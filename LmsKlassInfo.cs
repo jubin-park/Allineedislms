@@ -28,7 +28,7 @@ namespace Allineedislms
         public LmsKlassInfo(List<string> data)
         {
             Debug.Assert(data != null);
-            Debug.Assert(data.Count == 7);
+            Debug.Assert(data.Count == Program.TABLE_HEADER_SIZE);
 
             uint temp;
             bool isSuccess;

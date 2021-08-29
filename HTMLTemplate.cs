@@ -19,7 +19,7 @@ function submitForm()
         }}
 </script>
 </head>
-<body onload = ""submitForm()"" >
+<body onload=""submitForm()"">
 <form id=""theForm"" action=""{0}"" method=""POST"">
     <input type=""hidden"" name=""{1}"" value=""{3}""/>
     <input type=""hidden"" name=""{2}"" value=""{4}""/>

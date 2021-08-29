@@ -13,6 +13,8 @@ namespace Allineedislms
 {
     class Program
     {
+        public const int TABLE_HEADER_SIZE = 7;
+
         private static readonly string OLD_LMS_LOGIN_URL = "https://ieilmsold.jbnu.ac.kr/login/index.php";
         private static readonly string OLD_LMS_REFERER_URL = "https://ieilmsold.jbnu.ac.kr/login.php";
         private static readonly string OLD_LMS_KLASS_LIST_URL = "https://ieilmsold.jbnu.ac.kr/local/ubion/user/index.php?lang=ko";
@@ -37,8 +39,8 @@ namespace Allineedislms
         private static readonly string OLD_LMS_TEMP_FILENAME = "oldlms.html";
         private static readonly string NEW_LMS_TEMP_FILENAME = "newlms.html";
         private static readonly string LMS_DATA_FILENAME = "lmsdata.json";
-
-        private static readonly string[] TABLE_HEADER_NAMES = new string[7] { "index", "old-LMS", "new-LMS", "title", "class-#", "professor", "#-students" };
+        
+        private static readonly string[] TABLE_HEADER_NAMES = new string[TABLE_HEADER_SIZE] { "index", "old-LMS", "new-LMS", "title", "class-#", "professor", "#-students" };
         private static readonly string VERTICAL_BAR = "| ";
         private static readonly string FORMAT_FIXED_WIDTH = "{{0,{0}}}";
 
@@ -83,7 +85,7 @@ h[elp]
         private static string s_userId;
         private static string s_userPassword;
         private static string s_userName = "me";
-        private static List<LmsKlassInfo> s_LmsKlassInfos;
+        private static List<LmsKlassInfo> s_lmsKlassInfos;
         private static EMenuStatus s_menuStatus = EMenuStatus.LOGIN;
 
         static void Main(string[] args)
@@ -101,7 +103,7 @@ h[elp]
                         {
                             Console.WriteLine("* Enables automatic login" + Environment.NewLine);
                             s_userId = args[0];
-                            s_userPassword = getUrlEncoding(args[1]);
+                            s_userPassword = args[1];
                         }
                         s_menuStatus = EMenuStatus.AUTHENTICATION;
                         break;
@@ -112,7 +114,7 @@ h[elp]
                             s_userId = inputNumberOnly();
 
                             Console.Write("password: ");
-                            s_userPassword = getUrlEncoding(inputPassword().Trim());
+                            s_userPassword = inputPassword().Trim();
                         }
                         s_menuStatus = EMenuStatus.AUTHENTICATION;
                         break;
@@ -158,9 +160,9 @@ h[elp]
                                 try
                                 {
                                     string jsonString = File.ReadAllText(LMS_DATA_FILENAME);
-                                    s_LmsKlassInfos = JsonSerializer.Deserialize<List<LmsKlassInfo>>(jsonString);
+                                    s_lmsKlassInfos = JsonSerializer.Deserialize<List<LmsKlassInfo>>(jsonString);
                                     // valid check
-                                    foreach (LmsKlassInfo klass in s_LmsKlassInfos)
+                                    foreach (LmsKlassInfo klass in s_lmsKlassInfos)
                                     {
                                         if (klass.Name is null
                                             || klass.No == 0
@@ -190,14 +192,14 @@ h[elp]
 
                             if (!bLoadable)
                             {
-                                s_LmsKlassInfos = new List<LmsKlassInfo>();
+                                s_lmsKlassInfos = new List<LmsKlassInfo>();
                                 Console.Write("- Get class list from LMS ... ");
                                 if (tryUpdateLmsKlassInfos())
                                 {
                                     Console.WriteLine(MESSAGE_SUCCESS);
 
                                     Console.WriteLine(string.Format("- Serialize file \"{0}\"", LMS_DATA_FILENAME));
-                                    string jsonString = JsonSerializer.Serialize(s_LmsKlassInfos);
+                                    string jsonString = JsonSerializer.Serialize(s_lmsKlassInfos);
                                     File.WriteAllText(LMS_DATA_FILENAME, jsonString);
                                 }
                                 else
@@ -222,7 +224,7 @@ h[elp]
 
                             int maxNameWidth = (int)Math.Ceiling((double)TABLE_HEADER_NAMES[3].Length / 2);
                             int maxProfessorNameWidth = (int)Math.Ceiling((double)TABLE_HEADER_NAMES[5].Length / 2);
-                            foreach (LmsKlassInfo klass in s_LmsKlassInfos)
+                            foreach (LmsKlassInfo klass in s_lmsKlassInfos)
                             {
                                 maxNameWidth = Math.Max(maxNameWidth, klass.Name.Length);
                                 maxProfessorNameWidth = Math.Max(maxProfessorNameWidth, klass.ProfessorName.Length);
@@ -247,7 +249,7 @@ h[elp]
                                 border += new string('-', TABLE_HEADER_NAMES[2].Length + VERTICAL_BAR.Length - 1) + '+';
 
                                 padding += maxNameWidth;
-                                WriteConsolePadded(TABLE_HEADER_NAMES[3], padding, ' ');
+                                writeConsolePadded(TABLE_HEADER_NAMES[3], padding, ' ');
                                 padding += VERTICAL_BAR.Length;
                                 Console.Write(VERTICAL_BAR);
                                 border += new string('-', maxNameWidth + VERTICAL_BAR.Length - 1) + '+';
@@ -257,7 +259,7 @@ h[elp]
                                 border += new string('-', TABLE_HEADER_NAMES[4].Length + VERTICAL_BAR.Length - 1) + '+';
 
                                 padding += maxProfessorNameWidth;
-                                WriteConsolePadded(TABLE_HEADER_NAMES[5], padding, ' ');
+                                writeConsolePadded(TABLE_HEADER_NAMES[5], padding, ' ');
                                 padding += VERTICAL_BAR.Length;
                                 Console.Write(VERTICAL_BAR);
                                 border += new string('-', maxProfessorNameWidth + VERTICAL_BAR.Length - 1) + '+';
@@ -270,10 +272,10 @@ h[elp]
                                 Console.WriteLine(border);
                             }
 
-                            for (int i = 0; i < s_LmsKlassInfos.Count; ++i)
+                            for (int i = 0; i < s_lmsKlassInfos.Count; ++i)
                             {
                                 int padding = 0;
-                                LmsKlassInfo klass = s_LmsKlassInfos[i];
+                                LmsKlassInfo klass = s_lmsKlassInfos[i];
 
                                 // index
                                 padding += TABLE_HEADER_NAMES[0].Length + VERTICAL_BAR.Length;
@@ -289,7 +291,7 @@ h[elp]
 
                                 // title
                                 padding += maxNameWidth;
-                                WriteConsolePadded(klass.Name, padding, ' ');
+                                writeConsolePadded(klass.Name, padding, ' ');
                                 padding += VERTICAL_BAR.Length;
                                 Console.Write(VERTICAL_BAR);
 
@@ -299,7 +301,7 @@ h[elp]
 
                                 // professor
                                 padding += maxProfessorNameWidth;
-                                WriteConsolePadded(klass.ProfessorName, padding, ' ');
+                                writeConsolePadded(klass.ProfessorName, padding, ' ');
                                 padding += VERTICAL_BAR.Length;
                                 Console.Write(VERTICAL_BAR);
 
@@ -368,7 +370,7 @@ h[elp]
                                                 else
                                                 {
                                                     int index;
-                                                    if (int.TryParse(parameters[i], out index) && --index >= 0 && index < s_LmsKlassInfos.Count)
+                                                    if (int.TryParse(parameters[i], out index) && --index >= 0 && index < s_lmsKlassInfos.Count)
                                                     {
                                                         indices.Add(index);
                                                     }
@@ -377,7 +379,7 @@ h[elp]
 
                                             if (indices.Count == 0)
                                             {
-                                                for (int i = 0; i < s_LmsKlassInfos.Count; ++i)
+                                                for (int i = 0; i < s_lmsKlassInfos.Count; ++i)
                                                 {
                                                     indices.Add(i);
                                                 }
@@ -399,7 +401,7 @@ h[elp]
 
                                             foreach (int index in indices)
                                             {
-                                                LmsKlassInfo klass = s_LmsKlassInfos[index];
+                                                LmsKlassInfo klass = s_lmsKlassInfos[index];
                                                 if (!bLmsMarkedCondition || klass.IsOldChecked)
                                                 {
                                                     Console.WriteLine(string.Format("- Navigate to Old-LMS {0} with webbrowser - {1}", klass.Name, OLD_LMS_CURRENT_KLASS_URL + klass.OldId));
@@ -467,7 +469,7 @@ h[elp]
         }
 
         // https://stackoverflow.com/questions/34894479/c-sharp-console-string-padding-with-unicode-characters
-        private static void WriteConsolePadded(string value, int length, char padValue)
+        private static void writeConsolePadded(string value, int length, char padValue)
         {
             Console.Write(value);
             if (Console.CursorLeft < length)
@@ -488,7 +490,7 @@ h[elp]
             request.AllowAutoRedirect = false; // https://stackoverflow.com/questions/16720483/c-sharp-send-post-request-and-receive-303-statuscode
 
             StreamWriter sw = new StreamWriter(request.GetRequestStream());
-            sw.Write(string.Format(OLD_LMS_LOGIN_REQUEST_DATA, s_userId, s_userPassword));
+            sw.Write(string.Format(OLD_LMS_LOGIN_REQUEST_DATA, s_userId, getUrlEncoded(s_userPassword)));
             sw.Close();
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
@@ -523,7 +525,7 @@ h[elp]
             request.CookieContainer = s_newLmsCookie;
 
             StreamWriter sw = new StreamWriter(request.GetRequestStream());
-            sw.Write(string.Format(NEW_LMS_LOGIN_REQUEST_DATA, s_userId, s_userPassword));
+            sw.Write(string.Format(NEW_LMS_LOGIN_REQUEST_DATA, s_userId, getUrlEncoded(s_userPassword)));
             sw.Close();
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
@@ -599,8 +601,8 @@ h[elp]
                     foreach (Match match in matches)
                     {
                         Debug.Assert(match.Success);
-                        Debug.Assert(match.Groups.Count == 7);
-                        if (!match.Success || match.Groups.Count != 7)
+                        Debug.Assert(match.Groups.Count == TABLE_HEADER_SIZE);
+                        if (!match.Success || match.Groups.Count != TABLE_HEADER_SIZE)
                         {
                             bError = true;
                             goto lb_exit;
@@ -715,18 +717,18 @@ h[elp]
                         }
                     }
 
-                    Debug.Assert(rawFinalKlass.Count == 7);
-                    if (rawFinalKlass.Count != 7)
+                    Debug.Assert(rawFinalKlass.Count == TABLE_HEADER_SIZE);
+                    if (rawFinalKlass.Count != TABLE_HEADER_SIZE)
                     {
                         return false;
                     }
                 }
             }
 
-            s_LmsKlassInfos.Clear();
+            s_lmsKlassInfos.Clear();
             foreach (List<string> rawFinalKlass in rawFinalLmsKlassInfos)
             {
-                s_LmsKlassInfos.Add(new LmsKlassInfo(rawFinalKlass));
+                s_lmsKlassInfos.Add(new LmsKlassInfo(rawFinalKlass));
             }
 
             return true;
@@ -742,7 +744,7 @@ h[elp]
             }
             else if (parameters.Length == 1)
             {
-                foreach (LmsKlassInfo klass in s_LmsKlassInfos)
+                foreach (LmsKlassInfo klass in s_lmsKlassInfos)
                 {
                     klass.IsOldChecked = bOld;
                     klass.IsNewChecked = bNew;
@@ -753,15 +755,15 @@ h[elp]
                 for (int i = 1; i < parameters.Length; ++i)
                 {
                     int index;
-                    if (int.TryParse(parameters[i], out index) && --index >= 0 && index < s_LmsKlassInfos.Count)
+                    if (int.TryParse(parameters[i], out index) && --index >= 0 && index < s_lmsKlassInfos.Count)
                     {
-                        s_LmsKlassInfos[index].IsOldChecked = bOld;
-                        s_LmsKlassInfos[index].IsNewChecked = bNew;
+                        s_lmsKlassInfos[index].IsOldChecked = bOld;
+                        s_lmsKlassInfos[index].IsNewChecked = bNew;
                     }
                 }
             }
 
-            string jsonString = JsonSerializer.Serialize(s_LmsKlassInfos);
+            string jsonString = JsonSerializer.Serialize(s_lmsKlassInfos);
             File.WriteAllText(LMS_DATA_FILENAME, jsonString);
         }
 
@@ -857,37 +859,26 @@ h[elp]
             }
         }
 
-        private static string getUrlEncoding(string str)
+        // https://www.eso.org/~ndelmott/url_encode.html
+        private static string getUrlEncoded(string str)
         {
-            str = str.Replace("%", "%25"); // first priority
-            str = str.Replace("`", "%60");
-            str = str.Replace("~", "%7E");
-            str = str.Replace("!", "%21");
-            str = str.Replace("#", "%23");
-            str = str.Replace("$", "%24");
-            str = str.Replace("^", "%5E");
-            str = str.Replace("&", "%26");
-            str = str.Replace("(", "%28");
-            str = str.Replace(")", "%29");
-            str = str.Replace("=", "%3D");
-            str = str.Replace("+", "%2B");
-            str = str.Replace("\\", "%5C");
-            str = str.Replace("|", "%7C");
-            str = str.Replace("/", "%2F");
-            str = str.Replace("[", "%5B");
-            str = str.Replace("]", "%5D");
-            str = str.Replace("{", "%7B");
-            str = str.Replace("}", "%7D");
-            str = str.Replace(";", "%3B");
-            str = str.Replace(":", "%3A");
-            str = str.Replace("'", "%27");
-            str = str.Replace("\"", "%22");
-            str = str.Replace("<", "%3C");
-            str = str.Replace(",", "%2C");
-            str = str.Replace(">", "%3E");
-            str = str.Replace("?", "%3F");
+            StringBuilder sb = new StringBuilder(str.Length * 3);
 
-            return str;
+            foreach (char c in str)
+            {
+                if (c >= 0x20 && c <= 0x7e
+                    && (c < 'A' || c > 'Z')
+                    && (c < 'a' || c > 'z'))
+                {
+                    sb.Append(string.Format("%{0:X}", (int)c));
+                }
+                else
+                {
+                    sb.Append(c);
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }

@@ -47,18 +47,29 @@ namespace Allineedislms
         private static readonly string MESSAGE_HELP =
 @"r[un] [-i[gnore]] [-n[ologin]] [<1st-index>, <2nd-index>, ...]
 	Launch webbrowser only for the indices marked
+    If you do not enter any indices, they are all selected by default
+
+    -ignore
+        Run both versions of LMS, whether checked or not
+
+    -nologin
+        Runs without logging in
 
 o[ld] [<1st-index>, <2nd-index>, ...]
 	Check selected indices for running Old version of LMS with webbrowser
+    If you do not enter any indices, they are all selected by default
 
 n[ew] [<1st-index>, <2nd-index>, ...]
 	Check selected indices for running New version of LMS with webbrowser
+    If you do not enter any indices, they are all selected by default
 
 b[oth] [<1st-index>, <2nd-index>, ...]
 	Check selected indices for running Both versions of LMS with webbrowser
+    If you do not enter any indices, they are all selected by default
 
 c[lear] [<1st-index>, <2nd-index>, ...]
 	Clear selected indices for running Both versions of LMS with webbrowser
+    If you do not enter any indices, they are all selected by default
 
 q[uit]
 	Shutdown

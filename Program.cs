@@ -101,7 +101,7 @@ h[elp]
                         {
                             Console.WriteLine("* Enables automatic login" + Environment.NewLine);
                             s_userId = args[0];
-                            s_userPassword = args[1];
+                            s_userPassword = getUrlEncoding(args[1]);
                         }
                         s_menuStatus = EMenuStatus.AUTHENTICATION;
                         break;
@@ -112,7 +112,7 @@ h[elp]
                             s_userId = inputNumberOnly();
 
                             Console.Write("password: ");
-                            s_userPassword = inputPassword().Trim();
+                            s_userPassword = getUrlEncoding(inputPassword().Trim());
                         }
                         s_menuStatus = EMenuStatus.AUTHENTICATION;
                         break;
@@ -855,6 +855,39 @@ h[elp]
                     throw;
                 }
             }
+        }
+
+        private static string getUrlEncoding(string str)
+        {
+            str = str.Replace("%", "%25"); // first priority
+            str = str.Replace("`", "%60");
+            str = str.Replace("~", "%7E");
+            str = str.Replace("!", "%21");
+            str = str.Replace("#", "%23");
+            str = str.Replace("$", "%24");
+            str = str.Replace("^", "%5E");
+            str = str.Replace("&", "%26");
+            str = str.Replace("(", "%28");
+            str = str.Replace(")", "%29");
+            str = str.Replace("=", "%3D");
+            str = str.Replace("+", "%2B");
+            str = str.Replace("\\", "%5C");
+            str = str.Replace("|", "%7C");
+            str = str.Replace("/", "%2F");
+            str = str.Replace("[", "%5B");
+            str = str.Replace("]", "%5D");
+            str = str.Replace("{", "%7B");
+            str = str.Replace("}", "%7D");
+            str = str.Replace(";", "%3B");
+            str = str.Replace(":", "%3A");
+            str = str.Replace("'", "%27");
+            str = str.Replace("\"", "%22");
+            str = str.Replace("<", "%3C");
+            str = str.Replace(",", "%2C");
+            str = str.Replace(">", "%3E");
+            str = str.Replace("?", "%3F");
+
+            return str;
         }
     }
 }

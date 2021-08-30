@@ -29,7 +29,7 @@ namespace Allineedislms
         private static readonly string NEW_LMS_KLASS_LIST_URL = "https://ieilms.jbnu.ac.kr/mypage/group/myGroupList.jsp";
         private static readonly string NEW_LMS_CURRENT_KLASS_URL = "https://ieilms.jbnu.ac.kr/mypage/group/groupPage.jsp?group_id=";
         private static readonly string NEW_LMS_LOGIN_REQUEST_DATA = "login={0}&passwd={1}";
-        private static readonly string NEW_LMS_LOGIN_SUCCESS_MESSAGE = "success_group";
+        private static readonly string[] NEW_LMS_LOGIN_SUCCESS_MESSAGES = { "success_group", "success" };
 
         private static readonly Regex OLD_LMS_REGEX_KLASS = new Regex(@"<a href=""http://ieilmsold.jbnu.ac.kr/course/view.php\?id=(\d+)"" class=""coursefullname"">([\w+\s]*)\s\[(\d+)_(\d+)\]</a></div></td><td class=""text-center"">(\w+)</td><td class=""text-center"">(\d+)</td>");
         private static readonly Regex OLD_LMS_REGEX_USER_NAME = new Regex(@"<h4>(\w+)</h4>");
@@ -540,7 +540,7 @@ h[elp]
                 stream.Close();
                 reader.Close();
 
-                return result.Equals(NEW_LMS_LOGIN_SUCCESS_MESSAGE);
+                return result.Equals(NEW_LMS_LOGIN_SUCCESS_MESSAGES[0]) || result.Equals(NEW_LMS_LOGIN_SUCCESS_MESSAGES[1]);
             }
 
             request.Abort();
@@ -673,25 +673,11 @@ h[elp]
                             {
                                 match.Groups[2].Value, // m_name
                                 match.Groups[3].Value, // m_no
-                                null,                  // m_professorName
                                 match.Groups[1].Value, // m_newId
                             });
                         }
                     }
 
-                    { // parse professor name
-                        MatchCollection matches = NEW_LMS_REGEX_PROFESSOR_NAME.Matches(result);
-                        Debug.Assert(matches.Count > 0);
-
-                        for (int i = 0; i < matches.Count; ++i)
-                        {
-                            Debug.Assert(matches[i].Success);
-                            Debug.Assert(matches[i].Groups.Count == 2);
-                            rawNewLmsKlassInfos[i][2] = matches[i].Groups[1].Value;
-                            Debug.Assert(rawNewLmsKlassInfos[i][2] != null);
-                        }
-                    }
-                
                 lb_exit:
                     request.Abort();
                     stream.Close();
@@ -709,10 +695,9 @@ h[elp]
                     foreach (List<string> rawNewKlass in rawNewLmsKlassInfos)
                     {
                         if (rawNewKlass[0].Equals(rawFinalKlass[0])     // m_name
-                            && rawNewKlass[1].Equals(rawFinalKlass[1])  // m_no
-                            && rawNewKlass[2].Equals(rawFinalKlass[2])) // m_professorName
+                            && rawNewKlass[1].Equals(rawFinalKlass[1]))  // m_no
                         {
-                            rawFinalKlass.Add(rawNewKlass[3]);          // m_newId
+                            rawFinalKlass.Add(rawNewKlass[2]);          // m_newId
                             break;
                         }
                     }
